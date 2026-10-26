@@ -1,0 +1,72 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { spawnSync } from 'node:child_process';
+
+const args = process.argv.slice(2);
+if (args.length !== 0 && (args.length !== 2 || args[0] !== '--package-root')) throw new Error('Use --package-root DIRECTORY');
+const root = args[1] ? path.resolve(args[1]) : fileURLToPath(new URL('../', import.meta.url));
+const { compareSchemas, parseJsonText } = await import(pathToFileURL(path.join(root, 'src/index.js')));
+const { renderReport } = await import(pathToFileURL(path.join(root, 'src/report.js')));
+const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'schema-shift-smoke-'));
+const example = path.join(root, 'examples/support-ticket');
+const read = (name) => parseJsonText(fs.readFileSync(path.join(example, name), 'utf8'));
+const before = read('before.schema.json');
+const after = read('after.schema.json');
+const corpus = read('corpus.json');
+let checks = 0;
+const checked = () => { checks += 1; };
+const cli = (args) => spawnSync(process.execPath, [path.join(root, 'src/cli.js'), ...args], { encoding: 'utf8', timeout: 20000 });
+const base = ['--before', path.join(example, 'before.schema.json'), '--after', path.join(example, 'after.schema.json'), '--corpus', path.join(example, 'corpus.json')];
+try {
+  const compared = await compareSchemas(before, after, corpus);
+  assert.equal(compared.outcome, 'changed');
+  assert.deepEqual([compared.summary.widened, compared.summary.narrowed], [2, 1]); checked();
+  const checkedReport = await compareSchemas(before, after, corpus, { mode: 'check' });
+  assert.equal(checkedReport.outcome, 'expectations-met'); checked();
+  const unchanged = await compareSchemas(before, before, { cases: [{ id: 'same', value: {} }] });
+  assert.equal(unchanged.outcome, 'no-observed-change'); checked();
+  const wrong = structuredClone(corpus);
+  wrong.cases[0].expect = 'narrowed';
+  assert.equal((await compareSchemas(before, after, wrong, { mode: 'check' })).outcome, 'expectation-mismatch'); checked();
+  await assert.rejects(compareSchemas(true, true, { cases: [] })); checked();
+  await assert.rejects(compareSchemas(true, true, { cases: [{ id: 'missing-expect', value: 1 }] }, { mode: 'check' })); checked();
+  await assert.rejects(compareSchemas({ $ref: 'https://invalid.example/schema' }, true, corpus)); checked();
+  assert.throws(() => parseJsonText('{"duplicate":1,"duplicate":2}')); checked();
+  const timed = await compareSchemas({ type: 'string', pattern: '^(a+)+$' }, true, { cases: [{ id: 'bounded', value: `${'a'.repeat(5000)}!` }] }, { timeoutMs: 100 });
+  assert.equal(timed.status, 'incomplete');
+  assert.equal(timed.cases[0].classification, 'unknown'); checked();
+  const html = renderReport(compared);
+  assert.match(html, /Content-Security-Policy/);
+  assert.match(html, /ordinary-ticket/); checked();
+  for (const option of ['--help', '--version']) {
+    const result = cli([option]);
+    assert.equal(result.status, 0, result.stderr);
+    assert.ok(result.stdout.length > 0); checked();
+  }
+  const jsonPath = path.join(temporary, 'result.json');
+  const htmlPath = path.join(temporary, 'result.html');
+  const comparison = cli(['compare', ...base, '--format', 'json', '--json', jsonPath, '--html', htmlPath]);
+  assert.equal(comparison.status, 1, comparison.stderr);
+  assert.equal(JSON.parse(comparison.stdout).outcome, 'changed');
+  assert.deepEqual(JSON.parse(fs.readFileSync(jsonPath, 'utf8')), JSON.parse(comparison.stdout));
+  assert.match(fs.readFileSync(htmlPath, 'utf8'), /ordinary-ticket/); checked();
+  assert.equal(cli(['check', ...base]).status, 0); checked();
+  const preserved = fs.readFileSync(jsonPath);
+  assert.equal(cli(['check', ...base, '--json', jsonPath]).status, 2);
+  assert.deepEqual(fs.readFileSync(jsonPath), preserved); checked();
+  const badCorpus = path.join(temporary, 'bad-corpus.json');
+  fs.writeFileSync(badCorpus, JSON.stringify(wrong));
+  const changedArgs = [...base]; changedArgs[5] = badCorpus;
+  assert.equal(cli(['check', ...changedArgs]).status, 1); checked();
+  fs.writeFileSync(badCorpus, '{"cases":[]}');
+  assert.equal(cli(['compare', ...changedArgs]).status, 2); checked();
+  const badInput = cli(['compare', '--before', path.join(temporary, 'private-path-marker'), '--after', base[3], '--corpus', base[5]]);
+  assert.equal(badInput.status, 2);
+  assert.ok(!badInput.stderr.includes(temporary) && !badInput.stderr.includes('private-path-marker')); checked();
+  console.log(JSON.stringify({ status: 'passed', checks, api: true, cli: true, worker: true, reportTemplate: true }));
+} finally {
+  fs.rmSync(temporary, { recursive: true, force: true });
+}

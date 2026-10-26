@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Synthetic support ticket after migration",
+  "type": "object",
+  "properties": {
+    "title": {"type": "string"},
+    "severity": {"type": "string", "enum": ["low", "high"]},
+    "effort": {"type": "number"},
+    "owner": {"type": ["string", "null"]},
+    "contact": {"$ref": "#/$defs/contact"}
+  },
+  "required": ["title", "severity", "effort", "owner"],
+  "additionalProperties": false,
+  "$defs": {
+    "contact": {
+      "type": "object",
+      "properties": {
+        "email": {"type": "string", "format": "email"},
+        "queue": {"type": "string", "enum": ["general", "billing"]}
+      },
+      "anyOf": [{"required": ["email"]}, {"required": ["queue"]}],
+      "additionalProperties": false
+    }
+  }
+}

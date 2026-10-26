@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {"id": "ordinary-ticket", "value": {"title": "Printer jam", "severity": "low", "effort": 3, "owner": "support-team"}, "expect": "accepted-both"},
+    {"id": "short-title", "value": {"title": "Jam", "severity": "low", "effort": 3, "owner": null}, "expect": "widened"},
+    {"id": "large-effort", "value": {"title": "Printer jam", "severity": "high", "effort": 13, "owner": null}, "expect": "widened"},
+    {"id": "missing-owner", "value": {"title": "Printer jam", "severity": "low", "effort": 3}, "expect": "narrowed"},
+    {"id": "wrong-title-type", "value": {"title": 7, "severity": "low", "effort": 3, "owner": null}, "expect": "rejected-both"},
+    {"id": "contact-with-no-route", "value": {"title": "Printer jam", "severity": "low", "effort": 3, "owner": null, "contact": {}}, "expect": "rejected-both"},
+    {"id": "contact-queue", "value": {"title": "Invoice request", "severity": "low", "effort": 2, "owner": null, "contact": {"queue": "billing"}}, "expect": "accepted-both"},
+    {"id": "format-is-annotation", "value": {"title": "Contact request", "severity": "low", "effort": 2, "owner": null, "contact": {"email": "not-an-email"}}, "expect": "accepted-both"}
+  ]
+}

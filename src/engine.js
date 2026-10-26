@@ -1,0 +1,2 @@
+export const ENGINE_VERSION = '8.20.0';
+export const ENGINE_OPTIONS = Object.freeze({ allErrors: true, validateFormats: false, coerceTypes: false, useDefaults: false, removeAdditional: false, strictSchema: false, strictTypes: false, strictTuples: false, strictRequired: false, strictNumbers: true, allowUnionTypes: true, allowMatchingProperties: true, ownProperties: true, validateSchema: true, addUsedSchema: true });

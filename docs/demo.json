@@ -1,0 +1,560 @@
+{
+  "format": "schema-shift-lab/report/v1",
+  "title": "Synthetic support-ticket schema comparison",
+  "status": "complete",
+  "mode": "compare",
+  "outcome": "changed",
+  "engine": {
+    "name": "Ajv",
+    "version": "8.20.0",
+    "dialect": "https://json-schema.org/draft/2020-12/schema",
+    "formats": "annotation-only",
+    "options": {
+      "allErrors": true,
+      "validateFormats": false,
+      "coerceTypes": false,
+      "useDefaults": false,
+      "removeAdditional": false,
+      "strictSchema": false,
+      "strictTypes": false,
+      "strictTuples": false,
+      "strictRequired": false,
+      "strictNumbers": true,
+      "allowUnionTypes": true,
+      "allowMatchingProperties": true,
+      "ownProperties": true,
+      "validateSchema": true,
+      "addUsedSchema": true
+    }
+  },
+  "inputs": {
+    "before": {
+      "sha256": "4e81800d0eb7176d991bfd08f6eecf501da729b4260d79642b19dc506476857a",
+      "dialect": "https://json-schema.org/draft/2020-12/schema",
+      "declaredDialect": true,
+      "schema": {
+        "$defs": {
+          "contact": {
+            "additionalProperties": false,
+            "anyOf": [
+              {
+                "required": [
+                  "email"
+                ]
+              },
+              {
+                "required": [
+                  "queue"
+                ]
+              }
+            ],
+            "properties": {
+              "email": {
+                "format": "email",
+                "type": "string"
+              },
+              "queue": {
+                "enum": [
+                  "general",
+                  "billing"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "contact": {
+            "$ref": "#/$defs/contact"
+          },
+          "effort": {
+            "maximum": 8,
+            "minimum": 1,
+            "type": "number"
+          },
+          "owner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "low",
+              "high"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 60,
+            "minLength": 5,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "severity",
+          "effort"
+        ],
+        "title": "Synthetic support ticket before migration",
+        "type": "object"
+      }
+    },
+    "after": {
+      "sha256": "eccfe8ef6d42e0d3a999f6967670e054923febd9727e5c26259f71bc29699cb3",
+      "dialect": "https://json-schema.org/draft/2020-12/schema",
+      "declaredDialect": true,
+      "schema": {
+        "$defs": {
+          "contact": {
+            "additionalProperties": false,
+            "anyOf": [
+              {
+                "required": [
+                  "email"
+                ]
+              },
+              {
+                "required": [
+                  "queue"
+                ]
+              }
+            ],
+            "properties": {
+              "email": {
+                "format": "email",
+                "type": "string"
+              },
+              "queue": {
+                "enum": [
+                  "general",
+                  "billing"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "contact": {
+            "$ref": "#/$defs/contact"
+          },
+          "effort": {
+            "type": "number"
+          },
+          "owner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "low",
+              "high"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "severity",
+          "effort",
+          "owner"
+        ],
+        "title": "Synthetic support ticket after migration",
+        "type": "object"
+      }
+    },
+    "corpus": {
+      "sha256": "3618d1816e6240363240e44ec66f16c8fd051cacfff3a12c268d97f6a02b5736",
+      "caseCount": 8
+    }
+  },
+  "summary": {
+    "caseCount": 8,
+    "evaluatedCount": 8,
+    "acceptedBoth": 3,
+    "rejectedBoth": 2,
+    "widened": 2,
+    "narrowed": 1,
+    "unknown": 0,
+    "expectationsDeclared": 8,
+    "expectationsMatched": 8,
+    "expectationMismatches": 0
+  },
+  "cases": [
+    {
+      "id": "ordinary-ticket",
+      "value": {
+        "effort": 3,
+        "owner": "support-team",
+        "severity": "low",
+        "title": "Printer jam"
+      },
+      "classification": "accepted-both",
+      "expected": "accepted-both",
+      "expectation": "matched",
+      "before": {
+        "valid": true,
+        "errors": [],
+        "errorCount": 0,
+        "truncated": false
+      },
+      "after": {
+        "valid": true,
+        "errors": [],
+        "errorCount": 0,
+        "truncated": false
+      }
+    },
+    {
+      "id": "short-title",
+      "value": {
+        "effort": 3,
+        "owner": null,
+        "severity": "low",
+        "title": "Jam"
+      },
+      "classification": "widened",
+      "expected": "widened",
+      "expectation": "matched",
+      "before": {
+        "valid": false,
+        "errors": [
+          {
+            "keyword": "minLength",
+            "instancePath": "/title",
+            "schemaPath": "#/properties/title/minLength",
+            "message": "must NOT have fewer than 5 characters"
+          }
+        ],
+        "errorCount": 1,
+        "truncated": false
+      },
+      "after": {
+        "valid": true,
+        "errors": [],
+        "errorCount": 0,
+        "truncated": false
+      }
+    },
+    {
+      "id": "large-effort",
+      "value": {
+        "effort": 13,
+        "owner": null,
+        "severity": "high",
+        "title": "Printer jam"
+      },
+      "classification": "widened",
+      "expected": "widened",
+      "expectation": "matched",
+      "before": {
+        "valid": false,
+        "errors": [
+          {
+            "keyword": "maximum",
+            "instancePath": "/effort",
+            "schemaPath": "#/properties/effort/maximum",
+            "message": "must be <= 8"
+          }
+        ],
+        "errorCount": 1,
+        "truncated": false
+      },
+      "after": {
+        "valid": true,
+        "errors": [],
+        "errorCount": 0,
+        "truncated": false
+      }
+    },
+    {
+      "id": "missing-owner",
+      "value": {
+        "effort": 3,
+        "severity": "low",
+        "title": "Printer jam"
+      },
+      "classification": "narrowed",
+      "expected": "narrowed",
+      "expectation": "matched",
+      "before": {
+        "valid": true,
+        "errors": [],
+        "errorCount": 0,
+        "truncated": false
+      },
+      "after": {
+        "valid": false,
+        "errors": [
+          {
+            "keyword": "required",
+            "instancePath": "",
+            "schemaPath": "#/required",
+            "message": "must have required property 'owner'"
+          }
+        ],
+        "errorCount": 1,
+        "truncated": false
+      }
+    },
+    {
+      "id": "wrong-title-type",
+      "value": {
+        "effort": 3,
+        "owner": null,
+        "severity": "low",
+        "title": 7
+      },
+      "classification": "rejected-both",
+      "expected": "rejected-both",
+      "expectation": "matched",
+      "before": {
+        "valid": false,
+        "errors": [
+          {
+            "keyword": "type",
+            "instancePath": "/title",
+            "schemaPath": "#/properties/title/type",
+            "message": "must be string"
+          }
+        ],
+        "errorCount": 1,
+        "truncated": false
+      },
+      "after": {
+        "valid": false,
+        "errors": [
+          {
+            "keyword": "type",
+            "instancePath": "/title",
+            "schemaPath": "#/properties/title/type",
+            "message": "must be string"
+          }
+        ],
+        "errorCount": 1,
+        "truncated": false
+      }
+    },
+    {
+      "id": "contact-with-no-route",
+      "value": {
+        "contact": {},
+        "effort": 3,
+        "owner": null,
+        "severity": "low",
+        "title": "Printer jam"
+      },
+      "classification": "rejected-both",
+      "expected": "rejected-both",
+      "expectation": "matched",
+      "before": {
+        "valid": false,
+        "errors": [
+          {
+            "keyword": "required",
+            "instancePath": "/contact",
+            "schemaPath": "#/$defs/contact/anyOf/0/required",
+            "message": "must have required property 'email'"
+          },
+          {
+            "keyword": "required",
+            "instancePath": "/contact",
+            "schemaPath": "#/$defs/contact/anyOf/1/required",
+            "message": "must have required property 'queue'"
+          },
+          {
+            "keyword": "anyOf",
+            "instancePath": "/contact",
+            "schemaPath": "#/$defs/contact/anyOf",
+            "message": "must match a schema in anyOf"
+          }
+        ],
+        "errorCount": 3,
+        "truncated": false
+      },
+      "after": {
+        "valid": false,
+        "errors": [
+          {
+            "keyword": "required",
+            "instancePath": "/contact",
+            "schemaPath": "#/$defs/contact/anyOf/0/required",
+            "message": "must have required property 'email'"
+          },
+          {
+            "keyword": "required",
+            "instancePath": "/contact",
+            "schemaPath": "#/$defs/contact/anyOf/1/required",
+            "message": "must have required property 'queue'"
+          },
+          {
+            "keyword": "anyOf",
+            "instancePath": "/contact",
+            "schemaPath": "#/$defs/contact/anyOf",
+            "message": "must match a schema in anyOf"
+          }
+        ],
+        "errorCount": 3,
+        "truncated": false
+      }
+    },
+    {
+      "id": "contact-queue",
+      "value": {
+        "contact": {
+          "queue": "billing"
+        },
+        "effort": 2,
+        "owner": null,
+        "severity": "low",
+        "title": "Invoice request"
+      },
+      "classification": "accepted-both",
+      "expected": "accepted-both",
+      "expectation": "matched",
+      "before": {
+        "valid": true,
+        "errors": [],
+        "errorCount": 0,
+        "truncated": false
+      },
+      "after": {
+        "valid": true,
+        "errors": [],
+        "errorCount": 0,
+        "truncated": false
+      }
+    },
+    {
+      "id": "format-is-annotation",
+      "value": {
+        "contact": {
+          "email": "not-an-email"
+        },
+        "effort": 2,
+        "owner": null,
+        "severity": "low",
+        "title": "Contact request"
+      },
+      "classification": "accepted-both",
+      "expected": "accepted-both",
+      "expectation": "matched",
+      "before": {
+        "valid": true,
+        "errors": [],
+        "errorCount": 0,
+        "truncated": false
+      },
+      "after": {
+        "valid": true,
+        "errors": [],
+        "errorCount": 0,
+        "truncated": false
+      }
+    }
+  ],
+  "structural": {
+    "changes": [
+      {
+        "pointer": "/properties/effort/maximum",
+        "kind": "removed",
+        "beforePresent": true,
+        "afterPresent": false,
+        "before": 8,
+        "after": null
+      },
+      {
+        "pointer": "/properties/effort/minimum",
+        "kind": "removed",
+        "beforePresent": true,
+        "afterPresent": false,
+        "before": 1,
+        "after": null
+      },
+      {
+        "pointer": "/properties/title/maxLength",
+        "kind": "removed",
+        "beforePresent": true,
+        "afterPresent": false,
+        "before": 60,
+        "after": null
+      },
+      {
+        "pointer": "/properties/title/minLength",
+        "kind": "removed",
+        "beforePresent": true,
+        "afterPresent": false,
+        "before": 5,
+        "after": null
+      },
+      {
+        "pointer": "/required",
+        "kind": "changed",
+        "beforePresent": true,
+        "afterPresent": true,
+        "before": [
+          "title",
+          "severity",
+          "effort"
+        ],
+        "after": [
+          "title",
+          "severity",
+          "effort",
+          "owner"
+        ]
+      },
+      {
+        "pointer": "/title",
+        "kind": "changed",
+        "beforePresent": true,
+        "afterPresent": true,
+        "before": "Synthetic support ticket before migration",
+        "after": "Synthetic support ticket after migration"
+      }
+    ],
+    "truncated": false,
+    "limit": 500
+  },
+  "limits": {
+    "inputBytes": 1048576,
+    "depth": 64,
+    "nodes": 50000,
+    "cases": 256,
+    "idLength": 128,
+    "errorsPerSide": 20,
+    "changes": 500,
+    "outputBytes": 16777216,
+    "timeoutMs": 3000,
+    "memoryMb": 64
+  },
+  "diagnostics": [
+    {
+      "code": "formats-annotation-only",
+      "message": "Formats and content keywords are annotations; no format assertion was performed."
+    },
+    {
+      "code": "binary64-numbers",
+      "message": "Numbers use JavaScript binary64 semantics; fractional values can be approximations. Hashes use key-sorted JSON serialization, not an RFC 8785 certification."
+    }
+  ],
+  "scope": [
+    "Only the supplied corpus was evaluated; no difference is not a proof of schema equivalence.",
+    "Reports contain supplied schemas and cases and are not redacted.",
+    "This compares local JSON Schema validation, not a provider's enforcement.",
+    "The worker resource limits bound this validator task; they are not a sandbox for arbitrary executable code."
+  ],
+  "demo": true
+}

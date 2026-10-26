@@ -1,0 +1,14 @@
+{
+  "name": "schema-shift-lab",
+  "version": "0.1.0",
+  "description": "Compare two explicit JSON Schemas against a shared fixture corpus with concrete acceptance witnesses.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {"node": "^22.0.0 || ^24.0.0"},
+  "bin": {"schema-shift-lab": "src/cli.js"},
+  "exports": {".": "./src/index.js", "./report": "./src/report.js"},
+  "files": ["src", "examples", "README.md", "LICENSE", "CHANGELOG.md", "SECURITY.md", "CONTRIBUTING.md", "MAINTENANCE.md", "docs/usage.md", "docs/preview.png"],
+  "scripts": {"build": "node scripts/build.js", "test": "node --test", "demo": "node scripts/demo.js", "smoke": "node scripts/smoke.js", "verify-package": "node scripts/verify-package.js"},
+  "dependencies": {"ajv": "8.20.0"},
+  "repository": {"type": "git", "url": "https://github.com/7364588/schema-shift-lab.git"}
+}
